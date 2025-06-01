@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Inloggad - skyddad sida</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Zen+Maru+Gothic&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1>Du är nu inloggad.</h1>
+  <button id="logout-btn">Logga ut</button>
+  <pre id="protected-content">Laddar data...</pre>
+
+  <script>
+    const baseUrl = 'https://dt207g-moment-4.onrender.com/api';
+    const token = sessionStorage.getItem('jwt');
+
+    if (!token) {
+      alert('Du måste logga in först!');
+      window.location.href = 'index.html';
+    }
+
+    document.getElementById('logout-btn').addEventListener('click', () => {
+      sessionStorage.removeItem('jwt');
+      window.location.href = 'index.html';
+    });
+
+    async function fetchProtectedData() {
+      try {
+        const res = await fetch(`${baseUrl}/protected`, {
+          headers: {
+            Authorization: 'Bearer ' + token
+          }
+        });
+        if (!res.ok) throw new Error('Kunde inte hämta skyddad data');
+        const data = await res.json();
+        document.getElementById('protected-content').textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        alert(err.message);
+        sessionStorage.removeItem('jwt');
+        window.location.href = 'index.html';
+      }
+    }
+
+    fetchProtectedData();
+  </script>
+</body>
+</html>
